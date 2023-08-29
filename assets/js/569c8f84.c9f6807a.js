@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunkdocs=self.webpackChunkdocs||[]).push([[796],{4875:o=>{o.exports=JSON.parse('{"title":"Handbook","slug":"/category/handbook","permalink":"/category/handbook","navigation":{"previous":{"title":"Roadmap","permalink":"/about/roadmap/"},"next":{"title":"How We Work","permalink":"/about/handbook/how-we-work"}}}')}}]);
