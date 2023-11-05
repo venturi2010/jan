@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+    <id>https://jan.ai/blog</id>
+    <title>Jan Blog</title>
+    <updated>2023-11-05T00:00:00.000Z</updated>
+    <generator>https://github.com/jpmonette/feed</generator>
+    <link rel="alternate" href="https://jan.ai/blog"/>
+    <subtitle>Jan Blog</subtitle>
+    <icon>https://jan.ai/img/favicon.ico</icon>
+    <entry>
+        <title type="html"><![CDATA[Hello World]]></title>
+        <id>https://jan.ai/blog/hello-world</id>
+        <link href="https://jan.ai/blog/hello-world"/>
+        <updated>2023-11-05T00:00:00.000Z</updated>
+        <summary type="html"><![CDATA[This is my first post on Docusaurus.]]></summary>
+        <content type="html"><![CDATA[<p>Hello World!</p>]]></content>
+        <author>
+            <name>Daniel</name>
+        </author>
+        <category label="hello" term="hello"/>
+        <category label="jan" term="jan"/>
+    </entry>
+</feed>

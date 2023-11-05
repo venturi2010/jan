@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunkdocs=self.webpackChunkdocs||[]).push([[2535],{5641:l=>{l.exports=JSON.parse('{"title":"All Posts","items":[{"title":"Hello World","permalink":"/blog/hello-world"}]}')}}]);
