@@ -1,7 +1,11 @@
 openapi: 3.0.0
 info:
-  title: Jan API Reference
-  description: Please see https://jan.ai for documentation.
+  title: API Reference
+  description: >
+    # Introduction
+
+    Jan API is compatible with the [OpenAI
+    API](https://platform.openai.com/docs/api-reference).
 version: 0.1.8
 contact:
   name: Jan Discord
@@ -14,8 +18,8 @@ servers:
 tags:
   - name: Models
     description: List and describe the various models available in the API.
-  - name: Chat Completion
-    description: >-
+  - name: Chat
+    description: >
       Given a list of messages comprising a conversation, the model will return
       a response.
   - name: Messages
@@ -23,47 +27,69 @@ tags:
       Messages capture a conversation's content. This can include the content
       from LLM responses and other metadata from [chat
       completions](/specs/chats).
-
-
-      - Users and assistants can send multimedia messages.
-
-
-      - An [OpenAI Message
-      API](https://platform.openai.com/docs/api-reference/messages) compatible
-      endpoint at `localhost:1337/v1/messages`.
-
-
-      - Jan's `messages` API is compatible with [OpenAI's Messages
-      API](https://platform.openai.com/docs/api-reference/messages), with
-      additional methods for managing messages locally.
   - name: Threads
-    description: |
-      Threads are conversations between an `assistant` and the user:
-        - Users can tweak `model` params and `assistant` behavior within each thread.
-        - Users can import and export threads.
-        - An [OpenAI Thread API](https://platform.openai.com/docs/api-reference/threads) compatible endpoint at `localhost:1337/v1/threads`. 
   - name: Assistants
     description: Configures and utilizes different AI assistants for varied tasks
 x-tagGroups:
   - name: Endpoints
     tags:
       - Models
-      - Chat Completion
+      - Chat
   - name: Chat
     tags:
       - Assistants
       - Messages
       - Threads
 paths:
+  /chat/completions:
+    post:
+      operationId: createChatCompletion
+      tags:
+        - Chat
+      summary: |
+        Create chat completion
+      description: >
+        Creates a model response for the given chat conversation.  <a  href =
+        "https://platform.openai.com/docs/api-reference/chat/create"> Equivalent
+        to OpenAI's create chat completion. </a>
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChatCompletionRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChatCompletionResponse'
+      x-codeSamples:
+        - lang: curl
+          source: >
+            curl -X POST
+            'http://localhost:3982/inferences/llamacpp/chat_completion' \
+                  -H "Content-Type: application/json" \
+                  -d '{
+                    "llama_model_path": "/path/to/your/model.gguf",
+                    "messages": [
+                      {
+                        "role": "user",
+                        "content": "hello"
+                      },
+                    ]
+                  }'
   /models:
     get:
       operationId: listModels
       tags:
         - Models
-      summary: List Models
-      description: >-
+      summary: List models
+      description: >
         Lists the currently available models, and provides basic information
-        about each one such as the owner and availability.
+        about each one such as the owner and availability.  <a  href =
+        "https://platform.openai.com/docs/api-reference/models/list"> Equivalent
+        to OpenAI's list model. </a>
       responses:
         '200':
           description: OK
@@ -79,8 +105,9 @@ paths:
       operationId: downloadModel
       tags:
         - Models
-      summary: Download Model
-      description: Download a model.
+      summary: Download model
+      description: |
+        Download a model.
       responses:
         '200':
           description: OK
@@ -94,21 +121,24 @@ paths:
             curl -X POST https://localhost:1337/v1/models
   /models/{model_id}:
     get:
-      operationId: getModel
+      operationId: retrieveModel
       tags:
         - Models
-      summary: Get Model
-      description: >-
+      summary: Retrieve model
+      description: >
         Get a model instance, providing basic information about the model such
-        as the owner and permissioning.
+        as the owner and permissioning.  <a  href =
+        "https://platform.openai.com/docs/api-reference/models/retrieve">
+        Equivalent to OpenAI's retrieve model. </a>
       parameters:
         - in: path
-          name: source_url
+          name: model_id
           required: true
           schema:
             type: string
-            example: https://huggingface.com/thebloke/example.gguf
-          description: The ID of the model to use for this request
+            example: zephyr-7b
+          description: |
+            The ID of the model to use for this request
       responses:
         '200':
           description: OK
@@ -124,8 +154,11 @@ paths:
       operationId: deleteModel
       tags:
         - Models
-      summary: Delete Model
-      description: Delete a model.
+      summary: Delete model
+      description: >
+        Delete a model. <a  href =
+        "https://platform.openai.com/docs/api-reference/models/delete">
+        Equivalent to OpenAI's delete model. </a>
       parameters:
         - in: path
           name: model
@@ -133,7 +166,8 @@ paths:
           schema:
             type: string
             example: zephyr-7b
-          description: The model to delete
+          description: |
+            The model to delete
       responses:
         '200':
           description: OK
@@ -150,8 +184,9 @@ paths:
       operationId: startModel
       tags:
         - Models
-      summary: Start Model
-      description: Starts an imported model. Loads the model into V/RAM.
+      summary: Start model
+      description: |
+        Starts an imported model. Loads the model into V/RAM.
       parameters:
         - in: path
           name: model
@@ -159,7 +194,8 @@ paths:
           schema:
             type: string
             example: zephyr-7b
-          description: The ID of the model to use for this request
+          description: |
+            The ID of the model to use for this request
       responses:
         '200':
           description: OK
@@ -176,8 +212,9 @@ paths:
       operationId: stopModel
       tags:
         - Models
-      summary: Stop Model
-      description: Stop an imported model.
+      summary: Stop model
+      description: |
+        Stop an imported model.
       parameters:
         - in: path
           name: model
@@ -203,7 +240,10 @@ paths:
       tags:
         - Threads
       summary: Create thread
-      description: Create a thread
+      description: >
+        Create a thread.  <a  href =
+        "https://platform.openai.com/docs/api-reference/threads/createThread">
+        Equivalent to OpenAI's create thread. </a>
       requestBody:
         required: false
         content:
@@ -226,7 +266,7 @@ paths:
       x-codeSamples:
         - lang: cURL
           source: |
-            curl -X POST {JAN_URL}/v1/threads \
+            curl -X POST http://localhost:1337/v1/threads \
               -H "Content-Type: application/json" \
               -d '{
                   "messages": [{
@@ -243,7 +283,8 @@ paths:
       tags:
         - Threads
       summary: List threads
-      description: Retrieves a list of all threads available in the system.
+      description: |
+        Retrieves a list of all threads available in the system.
       responses:
         '200':
           description: List of threads retrieved successfully
@@ -271,17 +312,19 @@ paths:
       x-codeSamples:
         - lang: curl
           source: |
-            curl {JAN_URL}/v1/threads \
+            curl http://localhost:1337/v1/threads \
               -H "Content-Type: application/json" \
   /threads/{thread_id}:
     get:
       operationId: getThread
       tags:
         - Threads
-      summary: Get thread
-      description: >-
+      summary: Retrieve thread
+      description: >
         Retrieves detailed information about a specific thread using its
-        thread_id.
+        thread_id.  <a  href =
+        "https://platform.openai.com/docs/api-reference/threads/getThread">
+        Equivalent to OpenAI's retrieve thread. </a>
       parameters:
         - in: path
           name: thread_id
@@ -289,7 +332,8 @@ paths:
           schema:
             type: string
             example: thread_abc123
-          description: The ID of the thread to retrieve.
+          description: |
+            The ID of the thread to retrieve.
       responses:
         '200':
           description: Thread details retrieved successfully
@@ -300,13 +344,16 @@ paths:
       x-codeSamples:
         - lang: curl
           source: |
-            curl {JAN_URL}/v1/threads/{thread_id}
+            curl http://localhost:1337/v1/threads/{thread_id}
     post:
       operationId: modifyThread
       tags:
         - Threads
       summary: Modify thread
-      description: Modifies a thread
+      description: >
+        Modifies a thread.  <a  href =
+        "https://platform.openai.com/docs/api-reference/threads/modifyThread">
+        Equivalent to OpenAI's modify thread. </a>
       parameters:
         - in: path
           name: thread_id
@@ -314,7 +361,8 @@ paths:
           schema:
             type: string
             example: thread_abc123
-          description: The ID of the thread to be modified.
+          description: |
+            The ID of the thread to be modified.
       requestBody:
         required: false
         content:
@@ -337,7 +385,7 @@ paths:
       x-codeSamples:
         - lang: curl
           source: |
-            curl -X POST {JAN_URL}/v1/threads/{thread_id} \
+            curl -X POST http://localhost:1337/v1/threads/{thread_id} \
               -H "Content-Type: application/json" \
               -d '{
                   "messages": [{
@@ -354,7 +402,10 @@ paths:
       tags:
         - Threads
       summary: Delete thread
-      description: Delete a thread
+      description: >
+        Delete a thread.  <a  href =
+        "https://platform.openai.com/docs/api-reference/threads/deleteThread">
+        Equivalent to OpenAI's delete thread. </a>
       parameters:
         - in: path
           name: thread_id
@@ -362,7 +413,8 @@ paths:
           schema:
             type: string
             example: thread_abc123
-          description: The ID of the thread to be deleted.
+          description: |
+            The ID of the thread to be deleted.
       responses:
         '200':
           description: Thread deleted successfully
@@ -373,15 +425,15 @@ paths:
       x-codeSamples:
         - lang: curl
           source: |
-            curl -X DELETE {JAN_URL}/v1/threads/{thread_id}
+            curl -X DELETE http://localhost:1337/v1/threads/{thread_id}
   /threads/{thread_id}/assistants:
     get:
       operationId: getThreadAssistants
       tags:
         - Threads
       summary: Get Thread.Assistants
-      description:
-        - Can achieve this goal by calling Get thread API
+      description: |
+        Can achieve this goal by calling Get thread API
       parameters:
         - in: path
           name: thread_id
@@ -400,25 +452,26 @@ paths:
       x-codeSamples:
         - lang: curl
           source: |
-            curl {JAN_URL}/v1/threads/{thread_id}/assistants
+            curl http://localhost:1337/v1/threads/{thread_id}/assistants
   /threads/{thread_id}/assistants/{assistants_id}:
     post:
       operationId: postThreadAssistants
       tags:
         - Threads
       summary: Modify Thread.Assistants
-      description:
-        - >-
-          Can achieve this goal by calling Modify Assistant API with
-          thread.assistant[]
+      description: >
+
+
+        Can achieve this goal by calling Modify Assistant API with
+        thread.assistant[]
   /threads/{thread_id}/:
     get:
       operationId: listThreadMessage
       tags:
         - Threads
       summary: List Thread.Messages
-      description:
-        - Can achieve this goal by calling Get Thread API
+      description: |
+        Can achieve this goal by calling Get Thread API
       parameters:
         - in: path
           name: thread_id
@@ -437,14 +490,17 @@ paths:
       x-codeSamples:
         - lang: curl
           source: |
-            curl {JAN_URL}/v1/threads/{thread_id}
+            curl http://localhost:1337/v1/threads/{thread_id}
   /threads/{thread_id}/messages:
     get:
       operationId: listMessages
       tags:
         - Messages
-      summary: List messaages
-      description: Retrieves all messages from the given thread.
+      summary: List messages
+      description: >
+        Retrieves all messages from the given thread. <a  href =
+        "https://platform.openai.com/docs/api-reference/messages/listMessages">
+        Equivalent to OpenAI's list messages. </a>
       parameters:
         - in: path
           name: thread_id
@@ -452,7 +508,8 @@ paths:
           schema:
             type: string
             example: thread_abc123
-          description: The ID of the thread from which to retrieve messages.
+          description: |
+            The ID of the thread from which to retrieve messages.
       responses:
         '200':
           description: List of messages retrieved successfully
@@ -463,14 +520,17 @@ paths:
       x-codeSamples:
         - lang: curl
           source: |
-            curl {JAN_URL}/v1/threads/{thread_id}/messages \
+            curl http://localhost:1337/v1/threads/{thread_id}/messages \
               -H "Content-Type: application/json"
     post:
       operationId: createMessage
       tags:
         - Messages
       summary: Create message
-      description: Create a message
+      description: >
+        Create a message. <a  href =
+        "https://platform.openai.com/docs/api-reference/messages/createMessage">
+        Equivalent to OpenAI's list messages. </a>
       parameters:
         - in: path
           name: thread_id
@@ -478,7 +538,8 @@ paths:
           schema:
             type: string
             example: thread_abc123
-          description: The ID of the thread to which the message will be posted.
+          description: |
+            The ID of the thread to which the message will be posted.
       requestBody:
         required: true
         content:
@@ -488,14 +549,20 @@ paths:
               properties:
                 role:
                   type: string
-                  description: Role of the sender, either 'user' or 'assistant'.
+                  description: |
+                    "Role of the sender, either 'user' or 'assistant'."
+
+                    <span style="color:#228B22">OpenAI compatible</span>
                   example: user
                   enum:
                     - user
                     - assistant
                 content:
                   type: string
-                  description: Text content of the message.
+                  description: |
+                    "Text content of the message."
+
+                    <span style="color:#228B22">OpenAI compatible</span>
                   example: How does AI work? Explain it in simple terms.
               required:
                 - role
@@ -510,7 +577,7 @@ paths:
       x-codeSamples:
         - lang: curl
           source: |
-            curl -X POST {JAN_URL}/v1/threads/{thread_id}/messages \
+            curl -X POST http://localhost:1337/v1/threads/{thread_id}/messages \
               -H "Content-Type: application/json" \
               -d '{
                 "role": "user",
@@ -521,10 +588,12 @@ paths:
       operationId: retrieveMessage
       tags:
         - Messages
-      summary: Retrieve Message
-      description: >-
+      summary: Retrieve message
+      description: >
         Retrieve a specific message from a thread using its thread_id and
-        message_id.
+        message_id. <a  href =
+        "https://platform.openai.com/docs/api-reference/messages/getMessage">
+        Equivalent to OpenAI's retrieve messages. </a>
       parameters:
         - in: path
           name: thread_id
@@ -532,14 +601,16 @@ paths:
           schema:
             type: string
             example: thread_abc123
-          description: The ID of the thread containing the message.
+          description: |
+            The ID of the thread containing the message.
         - in: path
           name: message_id
           required: true
           schema:
             type: string
             example: msg_abc123
-          description: The ID of the message to retrieve.
+          description: |
+            The ID of the message to retrieve.
       responses:
         '200':
           description: OK
@@ -549,16 +620,21 @@ paths:
                 $ref: '#/components/schemas/GetMessageResponse'
       x-codeSamples:
         - lang: curl
-          source: |
-            curl {JAN_URL}/v1/threads/{thread_id}/messages/{message_id} \
+          source: >
+            curl
+            http://localhost:1337/v1/threads/{thread_id}/messages/{message_id} \
               -H "Content-Type: application/json"
   /threads/{thread_id}/messages/{message_id}/files:
     get:
       operationId: listMessageFiles
       tags:
         - Messages
-      summary: List message files
-      description: Returns a list of message files.
+      summary: |
+        List message files 
+      description: >
+        Returns a list of message files.  <a  href =
+        "https://platform.openai.com/docs/api-reference/messages/listMessageFiles">
+        Equivalent to OpenAI's list message files. </a>
       parameters:
         - in: path
           name: thread_id
@@ -566,14 +642,16 @@ paths:
           schema:
             type: string
             example: thread_abc123
-          description: The ID of the thread containing the message.
+          description: |
+            The ID of the thread containing the message.
         - in: path
           name: message_id
           required: true
           schema:
             type: string
             example: msg_abc123
-          description: The ID of the message whose files are to be listed.
+          description: |
+            The ID of the message whose files are to be listed. 
       responses:
         '200':
           description: List of files retrieved successfully
@@ -583,8 +661,10 @@ paths:
                 $ref: '#/components/schemas/ListMessageFilesResponse'
       x-codeSamples:
         - lang: curl
-          source: |
-            curl {JAN_URL}/v1/threads/{thread_id}/messages/{message_id}/files \
+          source: >
+            curl
+            http://localhost:1337/v1/threads/{thread_id}/messages/{message_id}/files
+            \
               -H "Content-Type: application/json"
   /threads/{thread_id}/messages/{message_id}/files/{file_id}:
     get:
@@ -592,7 +672,11 @@ paths:
       tags:
         - Messages
       summary: Retrieve message file
-      description: Retrieves a file associated with a specific message in a thread.
+      description: >
+        Retrieves a file associated with a specific message in a thread.  <a 
+        href =
+        "https://platform.openai.com/docs/api-reference/messages/getMessageFile">
+        Equivalent to OpenAI's retrieve message file. </a>
       parameters:
         - in: path
           name: thread_id
@@ -600,21 +684,24 @@ paths:
           schema:
             type: string
             example: thread_abc123
-          description: The ID of the thread containing the message.
+          description: |
+            The ID of the thread containing the message.
         - in: path
           name: message_id
           required: true
           schema:
             type: string
             example: msg_abc123
-          description: The ID of the message associated with the file.
+          description: |
+            The ID of the message associated with the file.
         - in: path
           name: file_id
           required: true
           schema:
             type: string
             example: file-abc123
-          description: The ID of the file to retrieve.
+          description: |
+            The ID of the file to retrieve.
       responses:
         '200':
           description: File retrieved successfully
@@ -626,14 +713,17 @@ paths:
         - lang: curl
           source: >
             curl
-            {JAN_URL}/v1/threads/{thread_id}/messages/{message_id}/files/{file_id}
+            http://localhost:1337/v1/threads/{thread_id}/messages/{message_id}/files/{file_id}
             \
               -H "Content-Type: application/json"
 x-webhooks:
   ModelObject:
     post:
       summary: The model object
-      description: Information about a model in the systems
+      description: >
+        Describe a model offering that can be used with the API. <a  href =
+        "https://platform.openai.com/docs/api-reference/models/object">
+        Equivalent to OpenAI's model object. </a>
       operationId: ModelObject
       tags:
         - Models
@@ -645,7 +735,10 @@ x-webhooks:
   MessageObject:
     post:
       summary: The message object
-      description: Information about a message in the thread
+      description: >
+        Information about a message in the thread.  <a  href =
+        "https://platform.openai.com/docs/api-reference/messages/object">
+        Equivalent to OpenAI's message object. </a>
       operationId: MessageObject
       tags:
         - Messages
@@ -657,13 +750,10 @@ x-webhooks:
   ThreadObject:
     post:
       summary: The thread object
-      description: >
-        - Each `thread` folder contains a `thread.json` file, which is a
-        representation of a thread.
-
-        - `thread.json` contains metadata and model parameter overrides.
-
-        - There are no required fields.
+      description: >-
+        Represents a thread that contains messages. <a  href =
+        "https://platform.openai.com/docs/api-reference/threads/object">
+        Equivalent to OpenAI's thread object. </a>
       operationId: ThreadObject
       tags:
         - Threads
@@ -674,6 +764,136 @@ x-webhooks:
               $ref: '#/components/schemas/ThreadObject'
 components:
   schemas:
+    ChatCompletionRequest:
+      type: object
+      properties:
+        messages:
+          type: arrays
+          description: |
+            Contains input data or prompts for the model to process
+          example:
+            - content: 'Hello there :wave:'
+              role: assistant
+            - content: Can you write a long story
+              role: user
+        model:
+          type: string
+          example: model-zephyr-7B
+          description: |
+            Specifies the model being used for inference or processing tasks
+        stream:
+          type: boolean
+          default: true
+          description: >
+            Enables continuous output generation, allowing for streaming of
+            model responses
+        max_tokens:
+          type: number
+          default: 2048
+          description: >
+            The maximum number of tokens the model will generate in a single
+            response
+        stop:
+          type: arrays
+          example:
+            - hello
+          description: >
+            Defines specific tokens or phrases at which the model will stop
+            generating further output
+        frequency_penalty:
+          type: number
+          default: 0
+          description: >
+            Adjusts the likelihood of the model repeating words or phrases in
+            its output
+        presence_penalty:
+          type: number
+          default: 0
+          description: >
+            Influences the generation of new and varied concepts in the model's
+            output
+        temperature:
+          type: number
+          default: 0.7
+          min: 0
+          max: 1
+          description: |
+            Controls the randomness of the model's output
+        top_p:
+          type: number
+          default: 0.95
+          min: 0
+          max: 1
+          description: |
+            Set probability threshold for more relevant outputs
+    ChatCompletionResponse:
+      type: object
+      description: Description of the response structure
+      properties:
+        choices:
+          type: array
+          description: Array of choice objects
+          items:
+            type: object
+            properties:
+              finish_reason:
+                type: string
+                nullable: true
+                example: null
+                description: Reason for finishing the response, if applicable
+              index:
+                type: integer
+                example: 0
+                description: Index of the choice
+              message:
+                type: object
+                properties:
+                  content:
+                    type: string
+                    example: Hello user. What can I help you with?
+                    description: Content of the message
+                  role:
+                    type: string
+                    example: assistant
+                    description: Role of the sender
+        created:
+          type: integer
+          example: 1700193928
+          description: Timestamp of when the response was created
+        id:
+          type: string
+          example: ebwd2niJvJB1Q2Whyvkz
+          description: Unique identifier of the response
+        model:
+          type: string
+          nullable: true
+          example: _
+          description: Model used for generating the response
+        object:
+          type: string
+          example: chat.completion
+          description: Type of the response object
+        system_fingerprint:
+          type: string
+          nullable: true
+          example: _
+          description: System fingerprint
+        usage:
+          type: object
+          description: Information about the usage of tokens
+          properties:
+            completion_tokens:
+              type: integer
+              example: 500
+              description: Number of tokens used for completion
+            prompt_tokens:
+              type: integer
+              example: 33
+              description: Number of tokens used in the prompt
+            total_tokens:
+              type: integer
+              example: 533
+              description: Total number of tokens used
     Model:
       type: object
       properties:
@@ -808,10 +1028,6 @@ components:
           type: string
           description: The current state of the model after the start operation.
           example: downloaded
-      required:
-        - id
-        - object
-        - state
     GetModelResponse:
       type: object
       properties:
@@ -919,10 +1135,6 @@ components:
           type: boolean
           description: Indicates whether the model was successfully deleted.
           example: true
-      required:
-        - id
-        - object
-        - deleted
     StartModelResponse:
       type: object
       properties:
@@ -966,75 +1178,79 @@ components:
       properties:
         id:
           type: string
-          description: The identifier of the thread, defaults to foldername.
+          description: |
+            "The identifier of the thread, defaults to foldername."
           example: thread_....
         object:
           type: string
-          description: Type of the object, defaults to thread.
+          description: |
+            "Type of the object, defaults to thread."
           example: thread
-        summary:
+        title:
           type: string
-          description: >-
-            A brief summary or description of the thread, defaults to an empty
-            string.
+          description: >
+            "A brief summary or description of the thread, defaults to an empty
+            string."
           example: funny physics joke
         assistants:
           type: array
+          description: ''
           items:
-            type: string
-          description: List of assistants involved in the thread, defaults to ["jan"].
-          example:
-            - jan
+            properties:
+              assistant_id:
+                type: string
+                description: |
+                  The identifier of assistant, defaults to "jan"
+                example: jan
+              model:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    description: ''
+                    example: ...
+                  settings:
+                    type: object
+                    description: >
+                      Defaults to and overrides assistant.json's "settings" (and
+                      if none, then model.json "settings")
+                  parameters:
+                    type: object
+                    description: >
+                      Defaults to and overrides assistant.json's "parameters"
+                      (and if none, then model.json "parameters")
         created:
           type: integer
           format: int64
-          description: >-
-            Unix timestamp representing the creation time of the thread,
-            defaults to file creation time.
+          description: >
+            "Unix timestamp representing the creation time of the thread,
+            defaults to file creation time."
           example: 1231231
         metadata:
           type: object
-          description: Metadata associated with the thread, defaults to an empty object.
+          description: |
+            "Metadata associated with the thread, defaults to an empty object."
           example: {}
-        messages:
-          type: array
-          description: List of messages within the thread.
-          items:
-            type: string
-          example: []
-        model_id:
-          type: string
-          description: >-
-            Model identifier associated with the thread, defaults to
-            assistant.model.
-          example: ...
-        settings:
-          type: object
-          description: >-
-            Settings for the thread, defaults to and overrides
-            assistant.settings.
-        parameters:
-          type: object
-          description: >-
-            Parameters for the thread, defaults to and overrides
-            assistant.settings.
     ThreadMessageObject:
       type: object
       properties:
         role:
           type: string
-          description: Role of the sender, either 'user' or 'assistant'.
+          description: |
+            "Role of the sender, either 'user' or 'assistant'."
           enum:
             - user
             - assistant
         content:
           type: string
-          description: Text content of the message.
+          description: |
+            "Text content of the message."
         file_ids:
           type: array
           items:
             type: string
-          description: Array of file IDs associated with the message, if any.
+          description: |
+            "Array of file IDs associated with the message, if any."
     CreateThreadResponse:
       type: object
       properties:
@@ -1093,7 +1309,8 @@ components:
       properties:
         id:
           type: string
-          description: The identifier of the modified thread.
+          description: |
+            "The identifier of the modified thread."
           example: thread_abc123
         object:
           type: string
@@ -1372,59 +1589,62 @@ components:
       properties:
         id:
           type: string
-          description: The identifier of the model.
+          description: |
+            "The identifier of the model."
           example: zephyr-7b
         object:
           type: string
-          description: The type of the object, indicating it's a model.
+          description: |
+            "The type of the object, indicating it's a model."
           default: model
         created:
           type: integer
           format: int64
-          description: Unix timestamp representing the creation time of the model.
+          description: |
+            "Unix timestamp representing the creation time of the model."
           example: '1253935178'
         owned_by:
           type: string
-          description: The entity that owns the model.
+          description: |
+            "The entity that owns the model."
           example: _
-      required:
-        - id
-        - object
-        - created
-        - owned_by
     MessageObject:
       type: object
       properties:
         id:
           type: string
-          description: Sequential or UUID identifier of the message.
+          description: |
+            "Sequential or UUID identifier of the message."
           example: 0
         object:
           type: string
-          description: Type of the object, defaults to 'thread.message'.
+          description: |
+            "Type of the object, defaults to 'thread.message'."
           example: thread.message
         created_at:
           type: integer
           format: int64
-          description: Unix timestamp representing the creation time of the message.
+          description: |
+            "Unix timestamp representing the creation time of the message."
         thread_id:
           type: string
-          description: >-
-            Identifier of the thread to which this message belongs. Defaults to
-            parent thread.
+          description: >
+            "Identifier of the thread to which this message belongs. Defaults to
+            parent thread."
           example: thread_asdf
         assistant_id:
           type: string
-          description: >-
-            Identifier of the assistant involved in the message. Defaults to
-            parent thread.
+          description: >
+            "Identifier of the assistant involved in the message. Defaults to
+            parent thread."
           example: jan
         role:
           type: string
           enum:
             - user
             - assistant
-          description: Role of the sender, either 'user' or 'assistant'.
+          description: |
+            "Role of the sender, either 'user' or 'assistant'."
         content:
           type: array
           items:
@@ -1432,21 +1652,25 @@ components:
             properties:
               type:
                 type: string
-                description: Type of content, e.g., 'text'.
+                description: |
+                  "Type of content, e.g., 'text'."
               text:
                 type: object
                 properties:
                   value:
                     type: string
-                    description: Text content of the message.
+                    description: |
+                      "Text content of the message."
                     example: Hi!?
                   annotations:
                     type: array
                     items:
                       type: string
-                    description: Annotations for the text content, if any.
+                    description: |
+                      "Annotations for the text content, if any."
                     example: []
         metadata:
           type: object
-          description: Metadata associated with the message, defaults to an empty object.
+          description: |
+            "Metadata associated with the message, defaults to an empty object."
           example: {}
