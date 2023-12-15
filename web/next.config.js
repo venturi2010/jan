@@ -28,8 +28,10 @@ const nextConfig = {
           'https://cdn.jsdelivr.net/npm/@janhq/plugin-catalog@latest/dist/index.js'
         ),
         VERSION: JSON.stringify(packageJson.version),
-        ANALYTICS_ID: process.env.ANALYTICS_ID ?? JSON.stringify('xxx'),
-        ANALYTICS_HOST: process.env.ANALYTICS_HOST ?? JSON.stringify('xxx'),
+        ANALYTICS_ID:
+          JSON.stringify(process.env.ANALYTICS_ID) ?? JSON.stringify('xxx'),
+        ANALYTICS_HOST:
+          JSON.stringify(process.env.ANALYTICS_HOST) ?? JSON.stringify('xxx'),
       }),
     ]
     return config
