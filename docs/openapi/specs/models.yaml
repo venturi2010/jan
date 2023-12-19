@@ -70,7 +70,7 @@ components:
             ctx_len:
               type: string
               description: Context length.
-              example: "2048"
+              example: "4096"
             ngl:
               type: string
               description: Number of layers.
@@ -94,7 +94,7 @@ components:
             token_limit:
               type: string
               description: Token limit for the model.
-              example: "2048"
+              example: "4096"
             top_k:
               type: string
               description: Top-k setting for the model.
@@ -208,8 +208,8 @@ components:
                 model.
               minimum: 128
               maximum: 4096
-              default: 2048
-              example: 2048
+              default: 4096
+              example: 4096
             n_parallel:
               type: integer
               description: Number of parallel operations, relevant when continuous batching is
@@ -241,8 +241,8 @@ components:
               description: Maximum context length the model can handle.
               minimum: 0
               maximum: 4096
-              default: 2048
-              example: 2048
+              default: 4096
+              example: 4096
             ngl:
               type: integer
               description: Number of layers in the neural network.
@@ -276,8 +276,8 @@ components:
                 response.
               minimum: 1
               maximum: 4096
-              default: 2048
-              example: 2048
+              default: 4096
+              example: 4096
             top_k:
               type: integer
               description: Limits the model to consider only the top k most likely next tokens
