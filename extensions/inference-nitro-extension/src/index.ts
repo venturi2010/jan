@@ -133,7 +133,7 @@ export default class JanInferenceNitroExtension implements InferenceExtension {
     const modelFullPath = await joinPath(["models", model.id]);
 
     const nitroInitResult = await executeOnMain(MODULE, "initModel", {
-      modelFullPath: modelFullPath,
+      modelFolderPath: modelFolderPath,
       model: model,
     });
 
