@@ -22,6 +22,7 @@ export const toRuntimeParams = (
 
   for (const [key, value] of Object.entries(modelParams)) {
     if (key in defaultModelParams) {
+      // @ts-ignore
       runtimeParams[key as keyof ModelRuntimeParams] = value
     }
   }
@@ -40,11 +41,14 @@ export const toSettingParams = (
     n_parallel: undefined,
     cpu_threads: undefined,
     prompt_template: undefined,
+    llama_model_path: undefined,
+    mmproj: undefined,
   }
   const settingParams: ModelSettingParams = {}
 
   for (const [key, value] of Object.entries(modelParams)) {
     if (key in defaultSettingParams) {
+      // @ts-ignore
       settingParams[key as keyof ModelSettingParams] = value
     }
   }

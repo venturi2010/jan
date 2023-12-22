@@ -88,7 +88,7 @@ export default class JanModelExtension implements ModelExtension {
     if (!(await fs.existsSync(modelDirPath))) await fs.mkdirSync(modelDirPath)
     if(model.source.length > 1) {
     // path to model binaries
-    model.source.forEach(modelFile => {
+    model.source.forEach((modelFile) => {
       const path = join(directoryPath, modelFile.filename)
       downloadFile(modelFile.url, path)
     })
@@ -111,7 +111,6 @@ export default class JanModelExtension implements ModelExtension {
    * @param {string} modelId - The ID of the model whose download is to be cancelled.
    * @returns {Promise<void>} A promise that resolves when the download has been cancelled.
    */
-  // TODO: Fix for cancel/ delete multiple model binaries
   async cancelModelDownload(modelId: string): Promise<void> {
     const model = await this.getConfiguredModels()
     console.log(model)
@@ -244,7 +243,18 @@ export default class JanModelExtension implements ModelExtension {
       const modelData = results.map((result) => {
         if (result.status === 'fulfilled') {
           try {
-            return result.value as Model
+            const tmpModel = result.value as Model
+            const tmpModel = JSON.parse(result.value)
+            if (tmpModel['source_url'] != null) {
+              tmpModel['source'] = [
+                {
+                  filename: tmpModel.id,
+                  url: tmpModel['source_url'],
+                },
+              ]
+            }
+
+            return tmpModel as Model
           } catch {
             console.debug(`Unable to parse model metadata: ${result.value}`)
             return undefined

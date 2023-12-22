@@ -1,6 +1,11 @@
-import { ExtensionType, fs, joinPath } from '@janhq/core'
-import { ConversationalExtension } from '@janhq/core'
-import { Thread, ThreadMessage } from '@janhq/core'
+import {
+  ExtensionType,
+  fs,
+  ConversationalExtension,
+  Thread,
+  ThreadMessage,
+  joinPath,
+} from '@janhq/core'
 
 /**
  * JSONConversationalExtension is a ConversationalExtension implementation that provides
@@ -113,10 +118,47 @@ export default class JSONConversationalExtension
       ])
       if (!(await fs.existsSync(threadDirPath)))
         await fs.mkdirSync(threadDirPath)
+      if (message.content[0].type === 'image') {
+        const filesPath = join(threadDirPath, 'files')
+        await fs.mkdir(filesPath)
+
+        const imagePath = join(filesPath, `${message.id}.png`)
+        const base64 = message.content[0].text.annotations[0]
+        await this.storeImage(base64, imagePath)
+      }
+
+      if (message.content[0].type === 'pdf') {
+        const filesPath = join(threadDirPath, 'files')
+        await fs.mkdir(filesPath)
+
+        const filePath = join(filesPath, `${message.id}.pdf`)
+        const blob = message.content[0].text.annotations[0]
+        await this.storeFile(blob, filePath)
+      }
+
       await fs.appendFileSync(threadMessagePath, JSON.stringify(message) + '\n')
       Promise.resolve()
     } catch (err) {
       Promise.reject(err)
+    }
+  }
+
+  async storeImage(base64: string, filePath: string): Promise<void> {
+    const base64Data = base64.replace(/^data:image\/\w+;base64,/, '')
+
+    try {
+      await fs.writeBlob(filePath, base64Data)
+    } catch (err) {
+      console.error(err)
+    }
+  }
+
+  async storeFile(base64: string, filePath: string): Promise<void> {
+    const base64Data = base64.replace(/^data:application\/pdf;base64,/, '')
+    try {
+      await fs.writeBlob(filePath, base64Data)
+    } catch (err) {
+      console.error(err)
     }
   }
 

@@ -19,6 +19,7 @@ import {
   executeOnMain,
   fs,
   Model,
+  InferenceEngine,
   joinPath,
   InferenceExtension,
   log,
@@ -128,12 +129,11 @@ export default class JanInferenceNitroExtension implements InferenceExtension {
   }
 
   private async onModelInit(model: Model) {
-    if (model.engine !== "nitro") return;
-
+    if (model.engine !== InferenceEngine.nitro) return;
     const modelFullPath = await joinPath(["models", model.id]);
 
     const nitroInitResult = await executeOnMain(MODULE, "initModel", {
-      modelFolderPath: modelFolderPath,
+      userSpacePath: userSpacePath,
       model: model,
     });
 
