@@ -66,19 +66,22 @@ paths:
                 $ref: '#/components/schemas/ChatCompletionResponse'
       x-codeSamples:
         - lang: cURL
-          source: >
-            curl -X POST
-            'http://localhost:3982/inferences/llamacpp/chat_completion' \
-                  -H "Content-Type: application/json" \
-                  -d '{
-                    "llama_model_path": "/path/to/your/model.gguf",
-                    "messages": [
-                      {
-                        "role": "user",
-                        "content": "hello"
-                      },
-                    ]
-                  }'
+          source: |
+            curl http://localhost:1337/v1/chat/completions \
+              -H "Content-Type: application/json" \
+              -d '{
+                "model": "tinyllama-1.1b",
+                "messages": [
+                  {
+                    "role": "system",
+                    "content": "You are a helpful assistant."
+                  },
+                  {
+                    "role": "user",
+                    "content": "Hello!"
+                  }
+                ]
+              }'
   /models:
     get:
       operationId: listModels
@@ -1004,13 +1007,13 @@ components:
           description: |
             Contains input data or prompts for the model to process.
           example:
-            - content: 'Hello there :wave:'
-              role: assistant
-            - content: Can you write a long story
+            - content: You are a helpful assistant.
+              role: system
+            - content: Hello!
               role: user
         model:
           type: string
-          example: model-zephyr-7B
+          example: tinyllama-1.1b
           description: |
             Specifies the model being used for inference or processing tasks.
         stream:
