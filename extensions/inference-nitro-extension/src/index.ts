@@ -26,7 +26,6 @@ import {
 } from "@janhq/core";
 import { requestInference } from "./helpers/sse";
 import { ulid } from "ulid";
-import { join } from "path";
 
 /**
  * A class that implements the InferenceExtension interface from the @janhq/core package.
@@ -109,10 +108,10 @@ export default class JanInferenceNitroExtension implements InferenceExtension {
 
   private async writeDefaultEngineSettings() {
     try {
-      const engineFile = join(
+      const engineFile = await joinPath([
         JanInferenceNitroExtension._homeDir,
-        JanInferenceNitroExtension._engineMetadataFileName
-      );
+        JanInferenceNitroExtension._engineMetadataFileName,
+      ]);
       if (await fs.existsSync(engineFile)) {
         const engine = await fs.readFileSync(engineFile, "utf-8");
         this._engineSettings =
@@ -133,8 +132,8 @@ export default class JanInferenceNitroExtension implements InferenceExtension {
     const modelFullPath = await joinPath(["models", model.id]);
 
     const nitroInitResult = await executeOnMain(MODULE, "initModel", {
-      userSpacePath: userSpacePath,
-      model: model,
+      modelFullPath,
+      model,
     });
 
     if (nitroInitResult.error === null) {

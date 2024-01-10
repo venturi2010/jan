@@ -49,7 +49,6 @@ export default class JanModelExtension implements ModelExtension {
 
   private async copyModelsToHomeDir() {
     try {
-      
       // Check for migration conditions
       if (
         localStorage.getItem(`${EXTENSION_NAME}-version`) === VERSION &&
@@ -86,23 +85,24 @@ export default class JanModelExtension implements ModelExtension {
     // create corresponding directory
     const modelDirPath = await joinPath([JanModelExtension._homeDir, model.id])
     if (!(await fs.existsSync(modelDirPath))) await fs.mkdirSync(modelDirPath)
-    if(model.source.length > 1) {
-    // path to model binaries
-    model.source.forEach((modelFile) => {
-      const path = join(directoryPath, modelFile.filename)
-      downloadFile(modelFile.url, path)
-    })
+    if (model.source.length > 1) {
+      // path to model binaries
+      for (const modelFile of model.source) {
+        const path = await joinPath([modelDirPath, modelFile.filename])
+        downloadFile(modelFile.url, path)
+      }
+      model.source.forEach((modelFile) => {})
     } else {
-    // try to retrieve the download file name from the source url
-    // if it fails, use the model ID as the file name
-    const extractedFileName = await model.source_url.split('/').pop()
-    const fileName = extractedFileName
-      .toLowerCase()
-      .endsWith(JanModelExtension._supportedModelFormat)
-      ? extractedFileName
-      : model.id
-    const path = await joinPath([modelDirPath, fileName])
-    downloadFile(model.source_url, path)
+      // try to retrieve the download file name from the source url
+      // if it fails, use the model ID as the file name
+      const extractedFileName = await model['source_url'].split('/').pop()
+      const fileName = extractedFileName
+        .toLowerCase()
+        .endsWith(JanModelExtension._supportedModelFormat)
+        ? extractedFileName
+        : model.id
+      const path = await joinPath([modelDirPath, fileName])
+      downloadFile(model['source_url'], path)
     }
   }
 
@@ -243,7 +243,6 @@ export default class JanModelExtension implements ModelExtension {
       const modelData = results.map((result) => {
         if (result.status === 'fulfilled') {
           try {
-            const tmpModel = result.value as Model
             const tmpModel = JSON.parse(result.value)
             if (tmpModel['source_url'] != null) {
               tmpModel['source'] = [
