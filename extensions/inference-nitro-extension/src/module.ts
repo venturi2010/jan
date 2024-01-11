@@ -97,7 +97,7 @@ async function initModel(wrapper: any): Promise<ModelOperationResponse> {
     }
 
     const modelFolderPath = path.join(
-      wrapper.userSpacePath,
+      janRoot,
       "models",
       wrapper.model.id
     );
@@ -105,7 +105,7 @@ async function initModel(wrapper: any): Promise<ModelOperationResponse> {
       ...wrapper.model.settings,
       llama_model_path: path.join(
         modelFolderPath,
-        wrapper.model.settings.llama_model_path
+        wrapper.model.settings.llama_model_path ?? ggufBinFile
       ),
       cpu_threads: nitroResourceProbe.numCpuPhysicalCore,
     };

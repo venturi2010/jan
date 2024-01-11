@@ -91,18 +91,17 @@ export default class JanModelExtension implements ModelExtension {
         const path = await joinPath([modelDirPath, modelFile.filename])
         downloadFile(modelFile.url, path)
       }
-      model.source.forEach((modelFile) => {})
     } else {
       // try to retrieve the download file name from the source url
       // if it fails, use the model ID as the file name
-      const extractedFileName = await model['source_url'].split('/').pop()
+      const extractedFileName = model.source[0]?.url.split('/').pop()
       const fileName = extractedFileName
         .toLowerCase()
         .endsWith(JanModelExtension._supportedModelFormat)
         ? extractedFileName
         : model.id
       const path = await joinPath([modelDirPath, fileName])
-      downloadFile(model['source_url'], path)
+      downloadFile(model.source[0]?.url, path)
     }
   }
 
@@ -215,7 +214,6 @@ export default class JanModelExtension implements ModelExtension {
 
       const readJsonPromises = allDirectories.map(async (dirName) => {
         // filter out directories that don't match the selector
-
         // read model.json
         const jsonPath = await joinPath([
           JanModelExtension._homeDir,
@@ -235,7 +233,7 @@ export default class JanModelExtension implements ModelExtension {
         } else {
           // otherwise, we generate our own model file
           // TODO: we might have more than one binary file here. This will be addressed with new version of Model file
-          //  which is the PR from Hiro on branch Jan can see
+          // which is the PR from Hiro on branch Jan can see
           return this.generateModelMetadata(dirName)
         }
       })
@@ -243,7 +241,10 @@ export default class JanModelExtension implements ModelExtension {
       const modelData = results.map((result) => {
         if (result.status === 'fulfilled') {
           try {
-            const tmpModel = JSON.parse(result.value)
+            const tmpModel =
+              typeof result.value === 'object'
+                ? result.value
+                : JSON.parse(result.value)
             if (tmpModel['source_url'] != null) {
               tmpModel['source'] = [
                 {
